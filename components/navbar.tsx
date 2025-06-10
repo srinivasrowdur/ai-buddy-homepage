@@ -4,9 +4,13 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
+import LoginDialog from "./login-dialog"
+import SignupDialog from "./signup-dialog"
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isLoginOpen, setIsLoginOpen] = useState(false)
+  const [isSignupOpen, setIsSignupOpen] = useState(false)
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -34,8 +38,8 @@ export default function Navbar() {
           </nav>
 
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="outline">Log In</Button>
-            <Button className="bg-purple-600 hover:bg-purple-700">Sign Up</Button>
+            <Button variant="outline" onClick={() => setIsLoginOpen(true)}>Log In</Button>
+            <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => setIsSignupOpen(true)}>Sign Up</Button>
           </div>
 
           <div className="md:hidden">
@@ -85,15 +89,26 @@ export default function Navbar() {
           <div className="pt-4 pb-3 border-t border-gray-200">
             <div className="flex items-center px-5">
               <div className="flex-shrink-0">
-                <Button variant="outline" className="w-full mb-2">
+                <Button variant="outline" className="w-full mb-2" onClick={() => setIsLoginOpen(true)}>
                   Log In
                 </Button>
-                <Button className="w-full bg-purple-600 hover:bg-purple-700">Sign Up</Button>
+                <Button className="w-full bg-purple-600 hover:bg-purple-700" onClick={() => setIsSignupOpen(true)}>Sign Up</Button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      <LoginDialog 
+        open={isLoginOpen} 
+        onOpenChange={setIsLoginOpen}
+        onSwitchToSignup={() => setIsSignupOpen(true)}
+      />
+      <SignupDialog 
+        open={isSignupOpen} 
+        onOpenChange={setIsSignupOpen}
+        onSwitchToLogin={() => setIsLoginOpen(true)}
+      />
     </header>
   )
 }
