@@ -27,27 +27,39 @@ export default function SignupDialog({ open, onOpenChange, onSwitchToLogin }: Si
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
+    // Basic validation
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+      alert("Please fill in all fields.")
+      return
+    }
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords don't match!")
       return
     }
 
     setIsLoading(true)
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    setIsLoading(false)
-    onOpenChange(false)
-    
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: ""
-    })
+    try {
+      // Call backend API for signup
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password
+        })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || "Signup failed")
+      onOpenChange(false)
+      // Reset form
+      setFormData({ name: "", email: "", password: "", confirmPassword: "" })
+    } catch (err: any) {
+      alert(err.message || "Signup failed")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleSocialSignup = (provider: string) => {
@@ -255,4 +267,4 @@ export default function SignupDialog({ open, onOpenChange, onSwitchToLogin }: Si
       </DialogContent>
     </Dialog>
   )
-} 
+}

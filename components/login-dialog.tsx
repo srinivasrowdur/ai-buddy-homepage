@@ -23,16 +23,35 @@ export default function LoginDialog({ open, onOpenChange, onSwitchToSignup }: Lo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    setIsLoading(false)
-    onOpenChange(false)
-    
-    // Reset form
-    setEmail("")
-    setPassword("")
+
+    // Basic validation
+    if (!email || !password) {
+      alert("Please enter both email and password.")
+      setIsLoading(false)
+      return
+    }
+
+    try {
+      // Call backend API for login
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || "Login failed")
+
+      // Optionally: store token, user info, etc.
+      // localStorage.setItem('token', data.token)
+      onOpenChange(false)
+      // Reset form
+      setEmail("")
+      setPassword("")
+    } catch (err: any) {
+      alert(err.message || "Login failed")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleSocialLogin = (provider: string) => {
@@ -188,4 +207,4 @@ export default function LoginDialog({ open, onOpenChange, onSwitchToSignup }: Lo
       </DialogContent>
     </Dialog>
   )
-} 
+}
