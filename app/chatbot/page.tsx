@@ -94,44 +94,83 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#ADEED9] py-8">
-      <div className="w-full max-w-xl bg-white rounded-lg shadow-lg p-6">
-        <h1 className="text-2xl font-bold mb-4 text-center">AI Chat</h1>
-        <div className="mb-4 min-h-[300px] max-h-[400px] overflow-y-auto border border-gray-200 rounded p-4 bg-gray-50">
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`mb-2 flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
-            >
+    <div className="min-h-screen flex flex-row bg-[#ADEED9]">
+      {/* Sidebar placeholder (25% width) */}
+      <div className="hidden md:flex flex-col w-1/4 min-h-screen bg-[#0ABAB5] p-6">
+        {/* You can add sidebar content/components here */}
+        <h2 className="text-white text-xl font-bold mb-4">Sidebar</h2>
+        {/* ...sidebar content... */}
+      </div>
+      {/* Chat area (75% width) */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        <div className="w-full h-full rounded-lg shadow-lg p-6 flex flex-col justify-center flex-1" style={{ backgroundColor: '#EBFFD8' }}>
+          <h1 className="text-2xl font-bold mb-4 text-center" style={{ color: '#0ABAB5' }}>AI Chat</h1>
+          <div className="mb-4 flex-1 max-h-[60vh] overflow-y-auto border border-gray-200 rounded p-4" style={{ backgroundColor: '#ADEED9' }}>
+            {messages.map((msg, i) => (
               <div
-                className={`px-4 py-2 rounded-lg max-w-[80%] text-sm ${
-                  msg.sender === "user"
-                    ? "bg-purple-100 text-purple-900"
-                    : "bg-green-100 text-green-900"
-                }`}
+                key={i}
+                className={`mb-4 flex items-center gap-3 ${msg.sender === "user" ? "justify-end flex-row-reverse" : "justify-start"}`}
               >
-                {msg.text}
+                {/* Square Avatar */}
+                <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-[#f3f4f6] rounded-md border border-gray-300">
+                  <img
+                    src={msg.sender === "user" ? "/user.png" : "/robot.png"}
+                    alt={msg.sender === "user" ? "User" : "Bot"}
+                    className="w-10 h-10 object-cover object-center"
+                    style={{ display: 'block' }}
+                  />
+                </div>
+                {/* Chat bubble */}
+                <div
+                  className={`px-5 py-3 rounded-xl max-w-[75%] text-base font-medium shadow-md ${
+                    msg.sender === "user"
+                      ? "rounded-br-none"
+                      : "rounded-bl-none"
+                  }`}
+                  style={{
+                    minWidth: '80px',
+                    backgroundColor: msg.sender === "user" ? '#56DFCF' : '#FFEDF3',
+                    color: msg.sender === "user" ? '#0A3A36' : '#B23A48',
+                  }}
+                >
+                  {msg.text}
+                </div>
               </div>
-            </div>
-          ))}
-          {loading && <div className="text-gray-400 text-center">Bot is typing...</div>}
-        </div>
-        <div className="flex gap-2">
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-            placeholder="Type your message..."
-            className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300"
-            disabled={loading}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={loading || !input.trim()}
-            className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 disabled:opacity-50"
-          >
-            Send
-          </button>
+            ))}
+            {loading && (
+              <div className="flex items-center gap-3 justify-start mb-4">
+                <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-[#f3f4f6] rounded-md border border-gray-300">
+                  <img
+                    src="/robot.png"
+                    alt="Bot"
+                    className="w-10 h-10 object-cover object-center"
+                    style={{ display: 'block' }}
+                  />
+                </div>
+                <div className="px-5 py-3 rounded-xl max-w-[75%] text-base font-medium rounded-bl-none shadow-md animate-pulse" style={{ minWidth: '80px', backgroundColor: '#FFEDF3', color: '#B23A48' }}>
+                  Bot is typing...
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="flex gap-2 mt-auto">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+              placeholder="Type your message..."
+              className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 bg-white"
+              disabled={loading}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={loading || !input.trim()}
+              className="text-white px-4 py-2 rounded hover:opacity-90 disabled:opacity-50"
+              style={{ backgroundColor: '#0ABAB5' }}
+            >
+              Send
+            </button>
+          </div>
         </div>
       </div>
     </div>
