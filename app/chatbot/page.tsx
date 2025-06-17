@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<{ sender: "user" | "bot"; text: string }[]>([]);
@@ -8,6 +8,7 @@ export default function ChatPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // On mount, fetch last session from backend and set greeting
   useEffect(() => {
@@ -47,6 +48,19 @@ export default function ChatPage() {
         });
     }
   }, [initialized]);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
+  // Focus input after every AI response
+  useEffect(() => {
+    if (messages.length > 0 && messages[messages.length - 1].sender === "bot" && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [messages]);
 
   // Helper to extract name from first message
   function extractName(msg: string): string {
@@ -155,6 +169,7 @@ export default function ChatPage() {
           </div>
           <div className="flex gap-2 mt-auto">
             <input
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}

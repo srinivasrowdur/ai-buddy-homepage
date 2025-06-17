@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Eye, EyeOff, Mail, Lock, Github } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface LoginDialogProps {
   open: boolean
@@ -19,6 +20,7 @@ export default function LoginDialog({ open, onOpenChange, onSwitchToSignup }: Lo
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,6 +49,8 @@ export default function LoginDialog({ open, onOpenChange, onSwitchToSignup }: Lo
       // Reset form
       setEmail("")
       setPassword("")
+      // Redirect to chatbot page
+      router.push("/chatbot")
     } catch (err: any) {
       alert(err.message || "Login failed")
     } finally {
