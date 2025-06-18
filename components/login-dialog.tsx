@@ -45,6 +45,7 @@ export default function LoginDialog({ open, onOpenChange, onSwitchToSignup }: Lo
 
       // Optionally: store token, user info, etc.
       // localStorage.setItem('token', data.token)
+      localStorage.setItem('user_email', email)
       onOpenChange(false)
       // Reset form
       setEmail("")

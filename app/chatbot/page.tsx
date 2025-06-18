@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { useUserEmail } from "@/hooks/use-user-email";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<{ sender: "user" | "bot"; text: string }[]>([]);
@@ -8,7 +9,34 @@ export default function ChatPage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
+  const [sessions, setSessions] = useState<{ session_id: string; title: string; created_at: string }[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const userEmail = useUserEmail();
+
+  // Helper to extract name from first message
+  function extractName(msg: string): string {
+    const lower = msg.toLowerCase();
+    if (lower.includes("name is")) {
+      return msg.substring(lower.indexOf("name is") + 8).split(" ")[0].replace(/[.,!?]/g, "");
+    } else if (lower.includes("i'm")) {
+      return msg.substring(lower.indexOf("i'm") + 4).split(" ")[0].replace(/[.,!?]/g, "");
+    } else if (lower.includes("i am")) {
+      return msg.substring(lower.indexOf("i am") + 5).split(" ")[0].replace(/[.,!?]/g, "");
+    } else if (lower.includes("this is")) {
+      return msg.substring(lower.indexOf("this is") + 8).split(" ")[0].replace(/[.,!?]/g, "");
+    } else {
+      return msg.split(" ")[0].replace(/[.,!?]/g, "");
+    }
+  }
+
+  // Store and retrieve user's name
+  const [userName, setUserName] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("user_name");
+      if (stored) setUserName(stored);
+    }
+  }, []);
 
   // On mount, fetch last session from backend and set greeting
   useEffect(() => {
@@ -16,13 +44,13 @@ export default function ChatPage() {
       fetch("http://localhost:8000/last_session")
         .then((res) => res.json())
         .then((data) => {
-          if (data.user_id && data.session_id) {
-            setUserId(data.user_id);
-            setSessionId(data.session_id);
+          setUserId(data.user_id || null);
+          setSessionId(data.session_id || null);
+          if (userName) {
             setMessages([
               {
                 sender: "bot",
-                text: `Welcome back, ${data.user_id}! What would you like to discuss today?`,
+                text: `Welcome back, ${userName}! What would you like to discuss today?`,
               },
             ]);
           } else {
@@ -47,7 +75,7 @@ export default function ChatPage() {
           setInitialized(true);
         });
     }
-  }, [initialized]);
+  }, [initialized, userName]);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -62,32 +90,43 @@ export default function ChatPage() {
     }
   }, [messages]);
 
-  // Helper to extract name from first message
-  function extractName(msg: string): string {
-    const lower = msg.toLowerCase();
-    if (lower.includes("name is")) {
-      return msg.substring(lower.indexOf("name is") + 8).split(" ")[0].replace(/[.,!?]/g, "");
-    } else if (lower.includes("i'm")) {
-      return msg.substring(lower.indexOf("i'm") + 4).split(" ")[0].replace(/[.,!?]/g, "");
-    } else if (lower.includes("i am")) {
-      return msg.substring(lower.indexOf("i am") + 5).split(" ")[0].replace(/[.,!?]/g, "");
-    } else {
-      return msg.split(" ")[0].replace(/[.,!?]/g, "");
+  // Fetch chat sessions for sidebar
+  useEffect(() => {
+    if (userEmail) {
+      console.log('Fetching sessions for user_id:', userEmail);
+      fetch(`http://localhost:8000/sessions?user_id=${encodeURIComponent(userEmail)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          console.log('Sessions fetched:', data);
+          setSessions(data);
+        });
     }
-  }
+  }, [userEmail]);
+
+  // After sending a message, refresh chat history
+  const refreshSessions = () => {
+    if (userEmail) {
+      fetch(`http://localhost:8000/sessions?user_id=${encodeURIComponent(userEmail)}`)
+        .then((res) => res.json())
+        .then((data) => setSessions(data));
+    }
+  };
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
-    let currentUserId = userId;
-    let isFirstUserMsg = !userId;
+    if (!input.trim() || !userEmail) return;
+    let currentUserId = userEmail;
+    let isFirstUserMsg = !userName;
     let newMessages = [...messages, { sender: "user" as const, text: input }];
     setMessages(newMessages);
     setLoading(true);
 
-    // If first message, extract name
+    // If first message, extract and store name
     if (isFirstUserMsg) {
-      currentUserId = extractName(input);
-      setUserId(currentUserId);
+      const extracted = extractName(input);
+      setUserName(extracted);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user_name", extracted);
+      }
     }
 
     // Send to backend
@@ -96,7 +135,7 @@ export default function ChatPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message: input,
-        user_id: currentUserId || "User",
+        user_id: currentUserId,
         session_id: sessionId,
       }),
     });
@@ -105,15 +144,66 @@ export default function ChatPage() {
     setSessionId(data.session_id);
     setInput("");
     setLoading(false);
+    refreshSessions();
+  };
+
+  // Function to load messages for a session
+  const loadSession = async (session_id: string) => {
+    if (!userEmail) return;
+    setLoading(true);
+    const res = await fetch(`http://localhost:8000/session_messages?user_id=${encodeURIComponent(userEmail)}&session_id=${encodeURIComponent(session_id)}`);
+    const data = await res.json();
+    setMessages(data.map((m: any) => ({ sender: m.sender, text: m.text })));
+    setSessionId(session_id);
+    setLoading(false);
   };
 
   return (
     <div className="min-h-screen flex flex-row bg-[#ADEED9]">
       {/* Sidebar placeholder (25% width) */}
       <div className="hidden md:flex flex-col w-1/4 min-h-screen bg-[#0ABAB5] p-6">
-        {/* You can add sidebar content/components here */}
-        <h2 className="text-white text-xl font-bold mb-4">Sidebar</h2>
-        {/* ...sidebar content... */}
+        <h2 className="text-white text-xl font-bold mb-4">Chat History</h2>
+        <button
+          className="mb-4 px-3 py-2 rounded bg-white text-[#0ABAB5] font-bold shadow hover:bg-[#ADEED9] transition"
+          onClick={async () => {
+            setMessages([]);
+            setSessionId(null);
+            setInput("");
+            setLoading(false);
+            // Optionally greet user again
+            if (userName) {
+              setMessages([
+                {
+                  sender: "bot",
+                  text: `Welcome back, ${userName}! What would you like to discuss today?`,
+                },
+              ]);
+            } else {
+              setMessages([
+                {
+                  sender: "bot",
+                  text: "Hello! I'm your AI assistant. Please tell me your name so I can remember you for future conversations.",
+                },
+              ]);
+            }
+            refreshSessions();
+          }}
+        >
+          + New Chat
+        </button>
+        <div className="flex-1 overflow-y-auto">
+          {sessions.length === 0 && <div className="text-white/70">No conversations yet.</div>}
+          {sessions.map((s) => (
+            <button
+              key={s.session_id}
+              className="w-full text-left px-3 py-2 mb-2 rounded bg-[#ADEED9] hover:bg-[#56DFCF] text-[#0A3A36] font-medium transition"
+              onClick={() => loadSession(s.session_id)}
+            >
+              <div className="truncate font-semibold">{s.title}</div>
+              <div className="text-xs text-[#0A3A36]/70">{new Date(s.created_at).toLocaleString()}</div>
+            </button>
+          ))}
+        </div>
       </div>
       {/* Chat area (75% width) */}
       <div className="flex-1 flex flex-col min-h-screen">
