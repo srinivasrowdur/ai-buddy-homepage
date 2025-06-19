@@ -194,14 +194,45 @@ export default function ChatPage() {
         <div className="flex-1 overflow-y-auto">
           {sessions.length === 0 && <div className="text-white/70">No conversations yet.</div>}
           {sessions.map((s) => (
-            <button
-              key={s.session_id}
-              className="w-full text-left px-3 py-2 mb-2 rounded bg-[#ADEED9] hover:bg-[#56DFCF] text-[#0A3A36] font-medium transition"
-              onClick={() => loadSession(s.session_id)}
-            >
-              <div className="truncate font-semibold">{s.title}</div>
-              <div className="text-xs text-[#0A3A36]/70">{new Date(s.created_at).toLocaleString()}</div>
-            </button>
+            <div key={s.session_id} className="flex items-center group w-full mb-2">
+              <button
+                className="flex-1 text-left px-3 py-2 rounded bg-[#ADEED9] hover:bg-[#56DFCF] text-[#0A3A36] font-medium transition truncate h-10 flex items-center"
+                style={{ minHeight: 40 }}
+                onClick={() => loadSession(s.session_id)}
+              >
+                <span className="truncate font-semibold">{s.title}</span>
+              </button>
+              <div className="flex items-center h-10" style={{ height: 40 }}>
+                <button
+                  className="flex items-center justify-center rounded bg-red-400 hover:bg-red-500 transition"
+                  style={{ width: 40, height: 40 }}
+                  title="Delete chat"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    if (!window.confirm('Delete this chat session?')) return;
+                    const resp = await fetch(`http://localhost:8000/delete_session`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        user_id: userEmail,
+                        session_id: s.session_id,
+                      }),
+                    });
+                    if (resp.ok) {
+                      setSessions((prev) => prev.filter(sess => sess.session_id !== s.session_id));
+                      if (sessionId === s.session_id) {
+                        setMessages([]);
+                        setSessionId(null);
+                      }
+                    } else {
+                      alert('Failed to delete session.');
+                    }
+                  }}
+                >
+                  <img src="/trash.svg" alt="Delete" className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
           ))}
         </div>
       </div>

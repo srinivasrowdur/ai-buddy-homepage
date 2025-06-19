@@ -12,6 +12,7 @@ from fastapi.responses import JSONResponse
 import sqlite3
 import ast
 import uuid
+from fastapi import Body
 
 load_dotenv()
 app = FastAPI()
@@ -205,3 +206,25 @@ def debug_memory_rows():
     except Exception as e:
         print(f"[DEBUG] /debug_memory_rows error: {e}")
         return JSONResponse([], status_code=500)
+
+@app.post("/delete_session")
+async def delete_session(request: Request):
+    db_file = "tmp/agent.db"
+    try:
+        data = await request.json()
+        user_id = data.get("user_id")
+        session_id = data.get("session_id")
+        if not user_id or not session_id:
+            return JSONResponse({"error": "user_id and session_id required"}, status_code=400)
+        conn = sqlite3.connect(db_file)
+        cursor = conn.cursor()
+        # Delete from chat_messages
+        cursor.execute("DELETE FROM chat_messages WHERE user_id = ? AND session_id = ?", (user_id, session_id))
+        # Delete from agent_sessions
+        cursor.execute("DELETE FROM agent_sessions WHERE user_id = ? AND session_id = ?", (user_id, session_id))
+        conn.commit()
+        conn.close()
+        return JSONResponse({"success": True})
+    except Exception as e:
+        print(f"[DEBUG] /delete_session error: {e}")
+        return JSONResponse({"error": str(e)}, status_code=500)
