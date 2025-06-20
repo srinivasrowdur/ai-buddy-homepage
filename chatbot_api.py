@@ -71,6 +71,20 @@ async def chat(request: Request):
             (str(uuid.uuid4()), user_id, session_id, "user", message)
         )
         conn.commit()
+        # Generate a concise title from all messages in the session
+        cursor.execute("SELECT text FROM chat_messages WHERE user_id = ? AND session_id = ? ORDER BY created_at ASC", (user_id, session_id))
+        all_text = ' '.join([row[0] for row in cursor.fetchall()])
+        import re
+        words = re.findall(r'\w+', all_text)
+        title = ' '.join(words[:3]) if words else 'Chat Session'
+        title = title.title()
+        # Update or insert session with title
+        cursor.execute("SELECT session_id FROM agent_sessions WHERE user_id = ? AND session_id = ?", (user_id, session_id))
+        if cursor.fetchone():
+            cursor.execute("UPDATE agent_sessions SET title = ? WHERE user_id = ? AND session_id = ?", (title, user_id, session_id))
+        else:
+            cursor.execute("INSERT INTO agent_sessions (user_id, session_id, title, created_at) VALUES (?, ?, ?, datetime('now'))", (user_id, session_id, title))
+        conn.commit()
         # Get bot response
         response = agent.run(message=message, user_id=user_id)
         if hasattr(response, "content"):
@@ -126,15 +140,15 @@ def get_sessions(user_id: str):
         if not cursor.fetchone():
             conn.close()
             return JSONResponse([])
-        # Get all sessions for the user, with session_id as the title
+        # Get all sessions for the user, with the stored title
         cursor.execute("""
-            SELECT session_id, created_at
+            SELECT session_id, title, created_at
             FROM agent_sessions
             WHERE user_id = ?
             ORDER BY created_at DESC
         """, (user_id,))
         sessions = [
-            {"session_id": row[0], "title": f"Chat Session ({row[0][:8]})", "created_at": row[1]} for row in cursor.fetchall()
+            {"session_id": row[0], "title": row[1] or f"Chat Session ({row[0][:8]})", "created_at": row[2]} for row in cursor.fetchall()
         ]
         conn.close()
         return JSONResponse(sessions)

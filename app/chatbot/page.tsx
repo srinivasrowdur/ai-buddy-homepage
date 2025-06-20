@@ -10,6 +10,7 @@ export default function ChatPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
   const [sessions, setSessions] = useState<{ session_id: string; title: string; created_at: string }[]>([]);
+  const [isNewSession, setIsNewSession] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const userEmail = useUserEmail();
 
@@ -119,8 +120,6 @@ export default function ChatPage() {
     let newMessages = [...messages, { sender: "user" as const, text: input }];
     setMessages(newMessages);
     setLoading(true);
-
-    // If first message, extract and store name
     if (isFirstUserMsg) {
       const extracted = extractName(input);
       setUserName(extracted);
@@ -128,7 +127,6 @@ export default function ChatPage() {
         localStorage.setItem("user_name", extracted);
       }
     }
-
     // Send to backend
     const res = await fetch("http://localhost:8000/chat", {
       method: "POST",
@@ -136,12 +134,13 @@ export default function ChatPage() {
       body: JSON.stringify({
         message: input,
         user_id: currentUserId,
-        session_id: sessionId,
+        session_id: isNewSession ? null : sessionId,
       }),
     });
     const data = await res.json();
     setMessages((msgs) => [...msgs, { sender: "bot" as const, text: data.reply }]);
     setSessionId(data.session_id);
+    setIsNewSession(false);
     setInput("");
     setLoading(false);
     refreshSessions();
@@ -164,13 +163,14 @@ export default function ChatPage() {
       <div className="hidden md:flex flex-col w-1/4 min-h-screen bg-[#0ABAB5] p-6">
         <h2 className="text-white text-xl font-bold mb-4">Chat History</h2>
         <button
-          className="mb-4 px-3 py-2 rounded bg-white text-[#0ABAB5] font-bold shadow hover:bg-[#ADEED9] transition"
+          className="mb-4 px-3 py-2 rounded"
+          style={{ backgroundColor: '#FFEDF3', color: '#0ABAB5', fontWeight: 'bold', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
           onClick={async () => {
             setMessages([]);
             setSessionId(null);
+            setIsNewSession(true);
             setInput("");
             setLoading(false);
-            // Optionally greet user again
             if (userName) {
               setMessages([
                 {
@@ -192,46 +192,48 @@ export default function ChatPage() {
           + New Chat
         </button>
         <div className="flex-1 overflow-y-auto">
-          {sessions.length === 0 && <div className="text-white/70">No conversations yet.</div>}
+          {sessions.length === 0 && <div className="text-[#B23A48]/70">No conversations yet.</div>}
           {sessions.map((s) => (
-            <div key={s.session_id} className="flex items-center group w-full mb-2">
+            <div
+              key={s.session_id}
+              className="flex items-center group w-full mb-2 bg-[#ADEED9] rounded-lg overflow-hidden"
+              style={{ height: 40 }}
+            >
               <button
-                className="flex-1 text-left px-3 py-2 rounded bg-[#ADEED9] hover:bg-[#56DFCF] text-[#0A3A36] font-medium transition truncate h-10 flex items-center"
+                className="flex-1 text-left px-3 py-2 text-[#0A3A36] font-medium transition truncate h-full flex items-center bg-transparent border-none outline-none shadow-none"
                 style={{ minHeight: 40 }}
                 onClick={() => loadSession(s.session_id)}
               >
                 <span className="truncate font-semibold">{s.title}</span>
               </button>
-              <div className="flex items-center h-10" style={{ height: 40 }}>
-                <button
-                  className="flex items-center justify-center rounded bg-red-400 hover:bg-red-500 transition"
-                  style={{ width: 40, height: 40 }}
-                  title="Delete chat"
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    if (!window.confirm('Delete this chat session?')) return;
-                    const resp = await fetch(`http://localhost:8000/delete_session`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        user_id: userEmail,
-                        session_id: s.session_id,
-                      }),
-                    });
-                    if (resp.ok) {
-                      setSessions((prev) => prev.filter(sess => sess.session_id !== s.session_id));
-                      if (sessionId === s.session_id) {
-                        setMessages([]);
-                        setSessionId(null);
-                      }
-                    } else {
-                      alert('Failed to delete session.');
+              <button
+                className="flex items-center justify-center h-full bg-red-400 hover:bg-red-500 transition border-none outline-none rounded-none"
+                style={{ width: 40, height: 40 }}
+                title="Delete chat"
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (!window.confirm('Delete this chat session?')) return;
+                  const resp = await fetch(`http://localhost:8000/delete_session`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      user_id: userEmail,
+                      session_id: s.session_id,
+                    }),
+                  });
+                  if (resp.ok) {
+                    setSessions((prev) => prev.filter(sess => sess.session_id !== s.session_id));
+                    if (sessionId === s.session_id) {
+                      setMessages([]);
+                      setSessionId(null);
                     }
-                  }}
-                >
-                  <img src="/trash.svg" alt="Delete" className="w-5 h-5" />
-                </button>
-              </div>
+                  } else {
+                    alert('Failed to delete session.');
+                  }
+                }}
+              >
+                <img src="/trash.svg" alt="Delete" className="w-5 h-5" />
+              </button>
             </div>
           ))}
         </div>
@@ -295,14 +297,15 @@ export default function ChatPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
               placeholder="Type your message..."
-              className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 bg-white"
+              className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
+              style={{ backgroundColor: '#FFEDF3' }}
               disabled={loading}
             />
             <button
               onClick={sendMessage}
               disabled={loading || !input.trim()}
-              className="text-white px-4 py-2 rounded hover:opacity-90 disabled:opacity-50"
-              style={{ backgroundColor: '#0ABAB5' }}
+              className="px-4 py-2 rounded hover:opacity-90 disabled:opacity-50"
+              style={{ backgroundColor: '#0ABAB5', color: '#fff' }}
             >
               Send
             </button>
