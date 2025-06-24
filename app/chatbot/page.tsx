@@ -157,6 +157,28 @@ export default function ChatPage() {
     setLoading(false);
   };
 
+  // Finalize chat title on page unload
+  useEffect(() => {
+    const finalizeTitle = async () => {
+      if (userEmail && sessionId) {
+        try {
+          await fetch("http://localhost:8000/finalize_title", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id: userEmail, session_id: sessionId }),
+          });
+        } catch (e) {
+          // Ignore errors on unload
+        }
+      }
+    };
+    window.addEventListener("beforeunload", finalizeTitle);
+    return () => {
+      finalizeTitle();
+      window.removeEventListener("beforeunload", finalizeTitle);
+    };
+  }, [userEmail, sessionId]);
+
   return (
     <div className="min-h-screen flex flex-row bg-[#ADEED9]">
       {/* Sidebar placeholder (25% width) */}

@@ -13,6 +13,7 @@ import sqlite3
 import ast
 import uuid
 from fastapi import Body
+import time
 
 load_dotenv()
 app = FastAPI()
@@ -24,6 +25,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+def get_db_connection(db_file="tmp/agent.db"):
+    conn = sqlite3.connect(db_file, timeout=10, check_same_thread=False)
+    conn.execute("PRAGMA journal_mode=WAL;")
+    return conn
 
 def get_agent(user_id: str, session_id: str = None, db_file="tmp/agent.db"):
     memory = Memory(
@@ -63,41 +69,36 @@ async def chat(request: Request):
     agent = get_agent(user_id, session_id)
     db_file = "tmp/agent.db"
     try:
-        # Save user message
-        conn = sqlite3.connect(db_file)
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO chat_messages (id, user_id, session_id, sender, text) VALUES (?, ?, ?, ?, ?)",
-            (str(uuid.uuid4()), user_id, session_id, "user", message)
-        )
-        conn.commit()
-        # Generate a concise title from all messages in the session
-        cursor.execute("SELECT text FROM chat_messages WHERE user_id = ? AND session_id = ? ORDER BY created_at ASC", (user_id, session_id))
-        all_text = ' '.join([row[0] for row in cursor.fetchall()])
-        import re
-        words = re.findall(r'\w+', all_text)
-        title = ' '.join(words[:3]) if words else 'Chat Session'
-        title = title.title()
-        # Update or insert session with title
-        cursor.execute("SELECT session_id FROM agent_sessions WHERE user_id = ? AND session_id = ?", (user_id, session_id))
-        if cursor.fetchone():
-            cursor.execute("UPDATE agent_sessions SET title = ? WHERE user_id = ? AND session_id = ?", (title, user_id, session_id))
-        else:
-            cursor.execute("INSERT INTO agent_sessions (user_id, session_id, title, created_at) VALUES (?, ?, ?, datetime('now'))", (user_id, session_id, title))
-        conn.commit()
-        # Get bot response
-        response = agent.run(message=message, user_id=user_id)
-        if hasattr(response, "content"):
-            reply = response.content
-        else:
-            reply = str(response)
-        # Save bot message
-        cursor.execute(
-            "INSERT INTO chat_messages (id, user_id, session_id, sender, text) VALUES (?, ?, ?, ?, ?)",
-            (str(uuid.uuid4()), user_id, session_id, "bot", reply)
-        )
-        conn.commit()
-        conn.close()
+        with get_db_connection(db_file) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO chat_messages (id, user_id, session_id, sender, text) VALUES (?, ?, ?, ?, ?)",
+                (str(uuid.uuid4()), user_id, session_id, "user", message)
+            )
+            conn.commit()
+            cursor.execute("SELECT text FROM chat_messages WHERE user_id = ? AND session_id = ? ORDER BY created_at ASC", (user_id, session_id))
+            all_text = ' '.join([row[0] for row in cursor.fetchall()])
+            import re
+            words = re.findall(r'\w+', all_text)
+            title = ' '.join(words[:3]) if words else 'Chat Session'
+            title = title.title()
+            # Always update if exists, otherwise insert
+            cursor.execute("SELECT 1 FROM agent_sessions WHERE session_id = ?", (session_id,))
+            if cursor.fetchone():
+                cursor.execute("UPDATE agent_sessions SET title = ?, user_id = ?, created_at = created_at WHERE session_id = ?", (title, user_id, session_id))
+            else:
+                cursor.execute("INSERT INTO agent_sessions (user_id, session_id, title, created_at) VALUES (?, ?, ?, datetime('now'))", (user_id, session_id, title))
+            conn.commit()
+            response = agent.run(message=message, user_id=user_id)
+            if hasattr(response, "content"):
+                reply = response.content
+            else:
+                reply = str(response)
+            cursor.execute(
+                "INSERT INTO chat_messages (id, user_id, session_id, sender, text) VALUES (?, ?, ?, ?, ?)",
+                (str(uuid.uuid4()), user_id, session_id, "bot", reply)
+            )
+            conn.commit()
         return {"reply": reply, "session_id": session_id}
     except Exception as e:
         print(f"[DEBUG] /chat error: {e}")
@@ -133,24 +134,20 @@ def last_session():
 def get_sessions(user_id: str):
     db_file = "tmp/agent.db"
     try:
-        conn = sqlite3.connect(db_file)
-        cursor = conn.cursor()
-        # Check if the table exists
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='agent_sessions'")
-        if not cursor.fetchone():
-            conn.close()
-            return JSONResponse([])
-        # Get all sessions for the user, with the stored title
-        cursor.execute("""
-            SELECT session_id, title, created_at
-            FROM agent_sessions
-            WHERE user_id = ?
-            ORDER BY created_at DESC
-        """, (user_id,))
-        sessions = [
-            {"session_id": row[0], "title": row[1] or f"Chat Session ({row[0][:8]})", "created_at": row[2]} for row in cursor.fetchall()
-        ]
-        conn.close()
+        with get_db_connection(db_file) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='agent_sessions'")
+            if not cursor.fetchone():
+                return JSONResponse([])
+            cursor.execute("""
+                SELECT session_id, title, created_at
+                FROM agent_sessions
+                WHERE user_id = ?
+                ORDER BY created_at DESC
+            """, (user_id,))
+            sessions = [
+                {"session_id": row[0], "title": row[1] or f"Chat Session ({row[0][:8]})", "created_at": row[2]} for row in cursor.fetchall()
+            ]
         return JSONResponse(sessions)
     except Exception as e:
         print(f"[DEBUG] /sessions error: {e}")
@@ -160,17 +157,16 @@ def get_sessions(user_id: str):
 def get_session_messages(user_id: str, session_id: str):
     db_file = "tmp/agent.db"
     try:
-        conn = sqlite3.connect(db_file)
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT sender, text, created_at FROM chat_messages WHERE user_id = ? AND session_id = ? ORDER BY created_at ASC",
-            (user_id, session_id)
-        )
-        messages = [
-            {"sender": row[0], "text": row[1], "created_at": row[2]} for row in cursor.fetchall()
-        ]
-        print(f"[DEBUG] /session_messages for user_id={user_id}, session_id={session_id}: {messages}")
-        conn.close()
+        with get_db_connection(db_file) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT sender, text, created_at FROM chat_messages WHERE user_id = ? AND session_id = ? ORDER BY created_at ASC",
+                (user_id, session_id)
+            )
+            messages = [
+                {"sender": row[0], "text": row[1], "created_at": row[2]} for row in cursor.fetchall()
+            ]
+            print(f"[DEBUG] /session_messages for user_id={user_id}, session_id={session_id}: {messages}")
         return JSONResponse(messages)
     except Exception as e:
         print(f"[DEBUG] /session_messages error: {e}")
@@ -230,15 +226,58 @@ async def delete_session(request: Request):
         session_id = data.get("session_id")
         if not user_id or not session_id:
             return JSONResponse({"error": "user_id and session_id required"}, status_code=400)
-        conn = sqlite3.connect(db_file)
-        cursor = conn.cursor()
-        # Delete from chat_messages
-        cursor.execute("DELETE FROM chat_messages WHERE user_id = ? AND session_id = ?", (user_id, session_id))
-        # Delete from agent_sessions
-        cursor.execute("DELETE FROM agent_sessions WHERE user_id = ? AND session_id = ?", (user_id, session_id))
-        conn.commit()
-        conn.close()
+        with get_db_connection(db_file) as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM chat_messages WHERE user_id = ? AND session_id = ?", (user_id, session_id))
+            cursor.execute("DELETE FROM agent_sessions WHERE user_id = ? AND session_id = ?", (user_id, session_id))
+            conn.commit()
         return JSONResponse({"success": True})
     except Exception as e:
         print(f"[DEBUG] /delete_session error: {e}")
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.post("/finalize_title")
+async def finalize_title(request: Request):
+    data = await request.json()
+    user_id = data.get("user_id")
+    session_id = data.get("session_id")
+    if not user_id or not session_id:
+        return JSONResponse({"error": "user_id and session_id required"}, status_code=400)
+    db_file = "tmp/agent.db"
+    try:
+        with get_db_connection(db_file) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT text FROM chat_messages WHERE user_id = ? AND session_id = ? ORDER BY created_at ASC",
+                (user_id, session_id)
+            )
+            all_text = ' '.join([row[0] for row in cursor.fetchall()])
+            # Use OpenAI GPT to generate a concise, grammatically correct title
+            import openai
+            openai.api_key = os.getenv("OPENAI_API_KEY")
+            prompt = (
+                "Summarize the following chat in a short, natural, and grammatically correct title of 1 to 4 words. "
+                "The title must be capitalized, focused, and sound like a real conversation topic.\n"
+                "Here are some examples:\n"
+                "Chat: Hi, can you help me with my math homework? Sure! What topic? Algebra.\nTitle: Math Homework Help\n"
+                "Chat: What's the weather in Paris? It's sunny today.\nTitle: Paris Weather\n"
+                "Chat: Tell me a joke. Why did the chicken cross the road?\nTitle: Lighthearted Joke\n"
+                "Chat: I need advice on my resume. Let's improve it together.\nTitle: Resume Advice\n"
+                "Chat: {chat}\nTitle:"
+            ).replace("{chat}", all_text)
+            response = openai.Completion.create(
+                engine="text-davinci-003",
+                prompt=prompt,
+                max_tokens=8,
+                temperature=0.4,
+                n=1,
+                stop=["\n"]
+            )
+            title = response.choices[0].text.strip().replace('"', '')
+            # Save the title
+            cursor.execute("UPDATE agent_sessions SET title = ? WHERE user_id = ? AND session_id = ?", (title, user_id, session_id))
+            conn.commit()
+        return JSONResponse({"success": True, "title": title})
+    except Exception as e:
+        print(f"[DEBUG] /finalize_title error: {e}")
         return JSONResponse({"error": str(e)}, status_code=500)
