@@ -73,12 +73,12 @@ export default function SignupDialog({ open, onOpenChange, onSwitchToLogin }: Si
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto bg-[#EBFFD8]">
         <DialogHeader className="text-center">
-          <DialogTitle className="text-2xl font-bold text-gray-900">
+          <DialogTitle className="text-2xl font-bold text-[#096B68]">
             Join AI Buddy today
           </DialogTitle>
-          <DialogDescription className="text-gray-600">
+          <DialogDescription className="text-[#129990]">
             Create your account and start building amazing AI companions
           </DialogDescription>
         </DialogHeader>
@@ -89,7 +89,7 @@ export default function SignupDialog({ open, onOpenChange, onSwitchToLogin }: Si
             <Button
               variant="outline"
               onClick={() => handleSocialSignup("google")}
-              className="w-full"
+              className="w-full border-[#129990] text-[#129990] hover:bg-[#90D1CA] hover:text-[#096B68]"
             >
               <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                 <path
@@ -115,7 +115,7 @@ export default function SignupDialog({ open, onOpenChange, onSwitchToLogin }: Si
             <Button
               variant="outline"
               onClick={() => handleSocialSignup("github")}
-              className="w-full"
+              className="w-full border-[#129990] text-[#129990] hover:bg-[#90D1CA] hover:text-[#096B68]"
             >
               <Github className="mr-2 h-4 w-4" />
               Continue with GitHub
@@ -127,67 +127,67 @@ export default function SignupDialog({ open, onOpenChange, onSwitchToLogin }: Si
               <Separator className="w-full" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-gray-500">Or create account with email</span>
+              <span className="bg-[#EBFFD8] px-2 text-[#096B68]">Or create account with email</span>
             </div>
           </div>
 
           {/* Sign up Form */}
           <form onSubmit={handleSubmit} className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="name" className="text-sm font-medium">
+              <Label htmlFor="name" className="text-sm font-medium text-[#096B68]">
                 Full name
               </Label>
               <div className="relative">
-                <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <User className="absolute left-3 top-3 h-4 w-4 text-[#90D1CA]" />
                 <Input
                   id="name"
                   type="text"
                   placeholder="Enter your full name"
                   value={formData.name}
                   onChange={(e) => updateFormData("name", e.target.value)}
-                  className="pl-10"
+                  className="pl-10 border-[#90D1CA] focus:border-[#129990]"
                   required
                 />
               </div>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="signup-email" className="text-sm font-medium">
+              <Label htmlFor="signup-email" className="text-sm font-medium text-[#096B68]">
                 Email address
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-[#90D1CA]" />
                 <Input
                   id="signup-email"
                   type="email"
                   placeholder="Enter your email"
                   value={formData.email}
                   onChange={(e) => updateFormData("email", e.target.value)}
-                  className="pl-10"
+                  className="pl-10 border-[#90D1CA] focus:border-[#129990]"
                   required
                 />
               </div>
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="signup-password" className="text-sm font-medium">
+              <Label htmlFor="signup-password" className="text-sm font-medium text-[#096B68]">
                 Password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-[#90D1CA]" />
                 <Input
                   id="signup-password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Create a password"
                   value={formData.password}
                   onChange={(e) => updateFormData("password", e.target.value)}
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 border-[#90D1CA] focus:border-[#129990]"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-3 text-[#90D1CA] hover:text-[#129990]"
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -199,24 +199,24 @@ export default function SignupDialog({ open, onOpenChange, onSwitchToLogin }: Si
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="confirm-password" className="text-sm font-medium">
+              <Label htmlFor="confirm-password" className="text-sm font-medium text-[#096B68]">
                 Confirm password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-[#90D1CA]" />
                 <Input
                   id="confirm-password"
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm your password"
                   value={formData.confirmPassword}
                   onChange={(e) => updateFormData("confirmPassword", e.target.value)}
-                  className="pl-10 pr-10"
+                  className="pl-10 pr-10 border-[#90D1CA] focus:border-[#129990]"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-3 text-[#90D1CA] hover:text-[#129990]"
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -228,14 +228,14 @@ export default function SignupDialog({ open, onOpenChange, onSwitchToLogin }: Si
             </div>
 
             <div className="flex items-start space-x-2 text-sm">
-              <input type="checkbox" className="rounded border-gray-300 mt-1" required />
-              <span className="text-gray-600">
+              <input type="checkbox" className="rounded border-[#90D1CA] mt-1" required />
+              <span className="text-[#129990]">
                 I agree to the{" "}
-                <button type="button" className="text-purple-600 hover:text-purple-700 font-medium">
+                <button type="button" className="text-[#129990] hover:text-[#096B68] font-medium">
                   Terms of Service
                 </button>{" "}
                 and{" "}
-                <button type="button" className="text-purple-600 hover:text-purple-700 font-medium">
+                <button type="button" className="text-[#129990] hover:text-[#096B68] font-medium">
                   Privacy Policy
                 </button>
               </span>
@@ -243,7 +243,7 @@ export default function SignupDialog({ open, onOpenChange, onSwitchToLogin }: Si
 
             <Button
               type="submit"
-              className="w-full bg-purple-600 hover:bg-purple-700"
+              className="w-full bg-[#129990] hover:bg-[#096B68] text-[#FFFBDE]"
               disabled={isLoading}
             >
               {isLoading ? "Creating account..." : "Create account"}
@@ -251,14 +251,14 @@ export default function SignupDialog({ open, onOpenChange, onSwitchToLogin }: Si
           </form>
 
           {/* Sign in link */}
-          <div className="text-center text-sm text-gray-600">
+          <div className="text-center text-sm text-[#129990]">
             Already have an account?{" "}
             <button
               onClick={() => {
                 onOpenChange(false)
                 onSwitchToLogin?.()
               }}
-              className="text-purple-600 hover:text-purple-700 font-medium"
+              className="text-[#129990] hover:text-[#096B68] font-medium"
             >
               Sign in
             </button>
