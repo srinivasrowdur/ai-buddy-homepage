@@ -1,12 +1,14 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Eye, EyeOff, Mail, Lock, User, Github } from "lucide-react"
+import { supabase } from "@/lib/supabase"
 
 interface SignupDialogProps {
   open: boolean
@@ -24,6 +26,7 @@ export default function SignupDialog({ open, onOpenChange, onSwitchToLogin }: Si
     password: "",
     confirmPassword: ""
   })
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -62,9 +65,15 @@ export default function SignupDialog({ open, onOpenChange, onSwitchToLogin }: Si
     }
   }
 
-  const handleSocialSignup = (provider: string) => {
-    console.log(`Sign up with ${provider}`)
-    // Handle social signup logic here
+  const handleSocialSignup = async (provider: "google" | "github") => {
+    setIsLoading(true)
+    try {
+      await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/chatbot` } })
+    } catch (err) {
+      alert("Social signup failed")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const updateFormData = (field: string, value: string) => {

@@ -42,9 +42,9 @@ export default function Home() {
               </div>
               <div className="relative h-[400px] w-full">
                 <img
-                  src="/friendly-ai-robot.png"
+                  src="/ai_buddy.png"
                   alt="AI Buddy Illustration"
-                  className="rounded-lg shadow-xl object-cover w-full h-full border-4 border-[#56DFCF]"
+                  className="rounded-lg shadow-xl object-contain w-full h-full border-4 border-[#56DFCF] transition duration-300 hover:scale-105 hover:shadow-2xl p-4"
                 />
               </div>
             </div>

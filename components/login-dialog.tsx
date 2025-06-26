@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Eye, EyeOff, Mail, Lock, Github } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { supabase } from "@/lib/supabase"
 
 interface LoginDialogProps {
   open: boolean
@@ -59,9 +60,15 @@ export default function LoginDialog({ open, onOpenChange, onSwitchToSignup }: Lo
     }
   }
 
-  const handleSocialLogin = (provider: string) => {
-    console.log(`Login with ${provider}`)
-    // Handle social login logic here
+  const handleSocialLogin = async (provider: "google" | "github") => {
+    setIsLoading(true)
+    try {
+      await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/chatbot` } })
+    } catch (err) {
+      alert("Social login failed")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
