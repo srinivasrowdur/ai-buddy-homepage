@@ -1,8 +1,23 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useUserEmail } from "@/hooks/use-user-email";
+import ProfileButton from "@/components/ProfileButton";
 
 export default function ChatPage() {
+  const [profileOpen, setProfileOpen] = useState(false);
+  // For dark mode toggle
+  const [darkMode, setDarkMode] = useState(false);
+
+  // Apply dark mode to body
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (darkMode) {
+        document.body.classList.add("dark");
+      } else {
+        document.body.classList.remove("dark");
+      }
+    }
+  }, [darkMode]);
   const [messages, setMessages] = useState<{ sender: "user" | "bot"; text: string }[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -180,10 +195,12 @@ export default function ChatPage() {
   }, [userEmail, sessionId]);
 
   return (
-    <div className="min-h-screen flex flex-row bg-[#ADEED9]">
+    <div className="min-h-screen flex flex-row bg-[#ADEED9] dark:bg-[#181C1F] transition-colors duration-300">
       {/* Sidebar placeholder (25% width) */}
-      <div className="hidden md:flex flex-col w-1/4 min-h-screen bg-[#0ABAB5] p-6">
-        <h2 className="text-white text-xl font-bold mb-4">Chat History</h2>
+      <div className="hidden md:flex flex-col w-1/4 min-h-screen bg-[#0ABAB5] dark:bg-[#23272A] p-6 transition-colors duration-300 border-r-2 border-[#7CF8E6] dark:border-[#3DE1C7]">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-white dark:text-[#ADEED9] text-xl font-bold">Chat History</h2>
+        </div>
         <button
           className="mb-4 px-3 py-2 rounded"
           style={{ backgroundColor: '#FFEDF3', color: '#0ABAB5', fontWeight: 'bold', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}
@@ -218,19 +235,19 @@ export default function ChatPage() {
           {sessions.map((s) => (
             <div
               key={s.session_id}
-              className="flex items-center group w-full mb-2 bg-[#ADEED9] rounded-lg overflow-hidden"
-              style={{ height: 40 }}
+              className="flex items-stretch group w-full mb-2 rounded-lg overflow-hidden transition-colors duration-300 border border-[#0ABAB5] dark:border-[#2D8C7F] bg-[#FFEDF3] dark:bg-[#23272A] shadow-sm"
+              style={{ height: 48, minHeight: 48 }}
             >
               <button
-                className="flex-1 text-left px-3 py-2 text-[#0A3A36] font-medium transition truncate h-full flex items-center bg-transparent border-none outline-none shadow-none"
-                style={{ minHeight: 40 }}
+                className="flex-1 text-left px-3 py-0 font-medium transition truncate flex items-center bg-transparent border-none outline-none shadow-none h-full min-h-0"
+                style={{ height: '100%', color: '#0ABAB5' }}
                 onClick={() => loadSession(s.session_id)}
               >
-                <span className="truncate font-semibold">{s.title}</span>
+                <span className="truncate font-semibold" style={{ color: '#0ABAB5' }}>{s.title}</span>
               </button>
               <button
-                className="flex items-center justify-center h-full bg-red-400 hover:bg-red-500 transition border-none outline-none rounded-none"
-                style={{ width: 40, height: 40 }}
+                className="flex items-center justify-center bg-red-400 hover:bg-red-500 transition border-none outline-none rounded-none h-full min-h-0"
+                style={{ width: 48, height: '100%' }}
                 title="Delete chat"
                 onClick={async (e) => {
                   e.stopPropagation();
@@ -261,17 +278,33 @@ export default function ChatPage() {
         </div>
       </div>
       {/* Chat area (75% width) */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        <div className="w-full h-full rounded-lg shadow-lg p-6 flex flex-col justify-center flex-1" style={{ backgroundColor: '#EBFFD8' }}>
-          <h1 className="text-2xl font-bold mb-4 text-center" style={{ color: '#0ABAB5' }}>AI Chat</h1>
-          <div className="mb-4 flex-1 max-h-[60vh] overflow-y-auto border border-gray-200 rounded p-4" style={{ backgroundColor: '#ADEED9' }}>
+      <div className="flex-1 flex flex-col min-h-screen relative">
+        {/* Floating Home & Profile Buttons (only one instance!) */}
+        <div className="fixed top-3 right-4 z-50 flex flex-row gap-2 items-start">
+          {/* Home button */}
+          <button
+            className="flex items-center justify-center h-10 w-10 rounded-full shadow-lg bg-white hover:bg-[#ADEED9] border-2 border-[#0ABAB5] transition-colors duration-200"
+            style={{ boxShadow: '0 4px 16px 0 rgba(10,186,181,0.15)' }}
+            onClick={() => window.location.href = '/'}
+            title="Go to Home"
+          >
+            <img src="/house-door.svg" alt="Home" className="w-6 h-6 text-[#0ABAB5]" style={{ color: '#0ABAB5' }} />
+          </button>
+          {/* Use the shared ProfileButton component for consistency and to avoid duplicate logic */}
+          <div className="h-10 flex items-center">
+            <ProfileButton />
+          </div>
+        </div>
+        <div className="w-full h-full rounded-lg shadow-lg p-6 flex flex-col justify-center flex-1 bg-[#EBFFD8] dark:bg-[#23272A] transition-colors duration-300">
+          <h1 className="text-2xl font-bold mb-4 text-center text-[#0ABAB5] dark:text-[#ADEED9]">AI Chat</h1>
+          <div className="mb-4 flex-1 max-h-[60vh] overflow-y-auto border border-gray-200 dark:border-[#23272A] rounded p-4 bg-[#ADEED9] dark:bg-[#181C1F] transition-colors duration-300">
             {messages.map((msg, i) => (
               <div
                 key={i}
                 className={`mb-4 flex items-center gap-3 ${msg.sender === "user" ? "justify-end flex-row-reverse" : "justify-start"}`}
               >
                 {/* Square Avatar */}
-                <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-[#f3f4f6] rounded-md border border-gray-300">
+                <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-[#f3f4f6] dark:bg-[#23272A] rounded-md border border-gray-300 dark:border-[#444]">
                   <img
                     src={msg.sender === "user" ? "/user.png" : "/robot.png"}
                     alt={msg.sender === "user" ? "User" : "Bot"}
@@ -281,16 +314,12 @@ export default function ChatPage() {
                 </div>
                 {/* Chat bubble */}
                 <div
-                  className={`px-5 py-3 rounded-xl max-w-[75%] text-base font-medium shadow-md ${
+                  className={`px-5 py-3 rounded-xl max-w-[75%] text-base font-medium shadow-md transition-colors duration-300 ${
                     msg.sender === "user"
-                      ? "rounded-br-none"
-                      : "rounded-bl-none"
+                      ? "rounded-br-none bg-[#56DFCF] text-[#0A3A36] dark:bg-[#2D8C7F] dark:text-[#ADEED9]"
+                      : "rounded-bl-none bg-[#FFEDF3] text-[#B23A48] dark:bg-[#23272A] dark:text-[#FFEDF3]"
                   }`}
-                  style={{
-                    minWidth: '80px',
-                    backgroundColor: msg.sender === "user" ? '#56DFCF' : '#FFEDF3',
-                    color: msg.sender === "user" ? '#0A3A36' : '#B23A48',
-                  }}
+                  style={{ minWidth: '80px' }}
                 >
                   {msg.text}
                 </div>
@@ -298,7 +327,7 @@ export default function ChatPage() {
             ))}
             {loading && (
               <div className="flex items-center gap-3 justify-start mb-4">
-                <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-[#f3f4f6] rounded-md border border-gray-300">
+                <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-[#f3f4f6] dark:bg-[#23272A] rounded-md border border-gray-300 dark:border-[#444]">
                   <img
                     src="/robot.png"
                     alt="Bot"
@@ -306,7 +335,7 @@ export default function ChatPage() {
                     style={{ display: 'block' }}
                   />
                 </div>
-                <div className="px-5 py-3 rounded-xl max-w-[75%] text-base font-medium rounded-bl-none shadow-md animate-pulse" style={{ minWidth: '80px', backgroundColor: '#FFEDF3', color: '#B23A48' }}>
+                <div className="px-5 py-3 rounded-xl max-w-[75%] text-base font-medium rounded-bl-none shadow-md animate-pulse transition-colors duration-300 bg-[#FFEDF3] text-[#B23A48] dark:bg-[#23272A] dark:text-[#FFEDF3]" style={{ minWidth: '80px' }}>
                   Bot is typing...
                 </div>
               </div>
@@ -319,15 +348,13 @@ export default function ChatPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
               placeholder="Type your message..."
-              className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2"
-              style={{ backgroundColor: '#FFEDF3' }}
+              className="flex-1 border border-gray-300 dark:border-[#444] rounded px-3 py-2 focus:outline-none focus:ring-2 bg-[#FFEDF3] dark:bg-[#23272A] text-[#0A3A36] dark:text-[#ADEED9] transition-colors duration-300"
               disabled={loading}
             />
             <button
               onClick={sendMessage}
               disabled={loading || !input.trim()}
-              className="px-4 py-2 rounded hover:opacity-90 disabled:opacity-50"
-              style={{ backgroundColor: '#0ABAB5', color: '#fff' }}
+              className="px-4 py-2 rounded hover:opacity-90 disabled:opacity-50 bg-[#0ABAB5] dark:bg-[#2D8C7F] text-white transition-colors duration-300"
             >
               Send
             </button>

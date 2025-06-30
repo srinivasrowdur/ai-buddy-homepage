@@ -1,3 +1,6 @@
+"use client";
+import { useState, useEffect } from "react";
+import { useUserEmail } from "@/hooks/use-user-email";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -8,18 +11,36 @@ import AiPersonalityCard from "@/components/ai-personality-card"
 import TestimonialCard from "@/components/testimonial-card"
 
 export default function Home() {
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const userEmail = useUserEmail();
+
+  // Apply dark mode to body
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (darkMode) {
+        document.body.classList.add("dark");
+      } else {
+        document.body.classList.remove("dark");
+      }
+    }
+  }, [darkMode]);
+
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#ADEED9]">
+    <div className="min-h-screen flex flex-col bg-[#ADEED9] dark:bg-[#181C1F] transition-colors duration-300">
       <Navbar />
+      {/* Profile Button is now only in the Navbar. Removed duplicate from homepage. */}
 
       <main className="flex-grow">
+        {/* ...existing code... */}
         {/* Hero Section */}
         <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#ADEED9] to-[#FFEDF3]">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
                 <Badge className="mb-4 bg-[#FFEDF3] text-[#0ABAB5] hover:bg-[#FFEDF3] font-bold">New Feature</Badge>
-                <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-[#0A3A36] mb-6">
+                <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#0ABAB5] via-[#B23A48] to-[#0A3A36] animate-gradient mb-6">
                   Create Your Perfect AI Companion
                 </h1>
                 <p className="text-xl text-[#0A3A36]/80 mb-8">
@@ -27,42 +48,42 @@ export default function Home() {
                   just a few clicks away.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Button size="lg" className="bg-[#0ABAB5] hover:bg-[#56DFCF] text-white font-bold">
+                  <Button size="lg" className="bg-[#0ABAB5] hover:bg-[#56DFCF] text-white font-bold shadow-md hover:shadow-[0_0_20px_#0ABAB5] transition-transform duration-300 hover:scale-105">
                     Create Your AI Buddy
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-[#0ABAB5] text-[#0ABAB5] font-bold hover:bg-[#ADEED9]"
+                    className="border-[#0ABAB5] text-[#0ABAB5] font-bold hover:bg-[#ADEED9] transition-transform duration-300 hover:scale-105"
                   >
                     Explore AI Personalities
                   </Button>
                 </div>
               </div>
-              <div className="relative h-[400px] w-full">
+              <div className="relative h-[400px] w-full animate-fadeIn">
                 <img
                   src="/ai_buddy.png"
                   alt="AI Buddy Illustration"
-                  className="rounded-lg shadow-xl object-contain w-full h-full border-4 border-[#56DFCF] transition duration-300 hover:scale-105 hover:shadow-2xl p-4"
+                  className="rounded-lg shadow-xl object-contain w-full h-full border-4 border-[#56DFCF] transition duration-300 hover:scale-110 hover:shadow-2xl p-4"
                 />
               </div>
             </div>
           </div>
         </section>
-
+        {/* ...existing code... */}
         {/* Features Section */}
         <section className="py-16 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-[#0A3A36] mb-4">Why Choose AI Buddy?</h2>
+              <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#0ABAB5] via-[#B23A48] to-[#0A3A36] animate-gradient mb-4">Why Choose AI Buddy?</h2>
               <p className="text-xl text-[#0A3A36]/80 max-w-3xl mx-auto">
                 Our platform offers a unique way to create and interact with AI personalities that adapt to your needs.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <Card className="border-0 shadow-lg bg-[#FFEDF3]">
+              <Card className="border-0 shadow-lg bg-[#FFEDF3] transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
                 <CardContent className="pt-6">
                   <div className="rounded-full bg-[#ADEED9] p-3 w-12 h-12 flex items-center justify-center mb-4">
                     <Brain className="h-6 w-6 text-[#0ABAB5]" />
@@ -74,7 +95,7 @@ export default function Home() {
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-lg bg-[#FFEDF3]">
+              <Card className="border-0 shadow-lg bg-[#FFEDF3] transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
                 <CardContent className="pt-6">
                   <div className="rounded-full bg-[#ADEED9] p-3 w-12 h-12 flex items-center justify-center mb-4">
                     <MessageSquare className="h-6 w-6 text-[#0ABAB5]" />
@@ -86,7 +107,7 @@ export default function Home() {
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-lg bg-[#FFEDF3]">
+              <Card className="border-0 shadow-lg bg-[#FFEDF3] transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
                 <CardContent className="pt-6">
                   <div className="rounded-full bg-[#ADEED9] p-3 w-12 h-12 flex items-center justify-center mb-4">
                     <Users className="h-6 w-6 text-[#0ABAB5]" />
@@ -100,12 +121,12 @@ export default function Home() {
             </div>
           </div>
         </section>
-
+        {/* ...existing code... */}
         {/* How It Works & Testimonials (split backgrounds) */}
         <section className="py-16 px-4 sm:px-6 lg:px-8 bg-[#EBFFD8]">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-[#0A3A36] mb-4">How It Works</h2>
+              <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#0ABAB5] via-[#B23A48] to-[#0A3A36] animate-gradient mb-4">How It Works</h2>
               <p className="text-xl text-[#0A3A36]/80 max-w-3xl mx-auto">
                 Creating your perfect AI companion is simple and fun
               </p>
@@ -140,12 +161,12 @@ export default function Home() {
             </div>
           </div>
         </section>
-
+        {/* ...existing code... */}
         {/* Testimonials with light pink background */}
         <section className="py-16 px-4 sm:px-6 lg:px-8 bg-[#FFEDF3]">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-[#0A3A36] mb-4">What Our Users Say</h2>
+              <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#0ABAB5] via-[#B23A48] to-[#0A3A36] animate-gradient mb-4">What Our Users Say</h2>
               <p className="text-xl text-[#0A3A36]/80 max-w-3xl mx-auto">
                 Thousands of people have already created their perfect AI companions
               </p>
@@ -176,7 +197,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-
+        {/* ...existing code... */}
         {/* Final CTA */}
         <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#0ABAB5] text-white">
           <div className="max-w-5xl mx-auto text-center">
