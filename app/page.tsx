@@ -83,9 +83,9 @@ export default function Home() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <Card className="border-0 shadow-lg bg-[#FFEDF3] dark:bg-[#23272A] dark:text-[#ADEED9] transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
+              <Card className="border-0 shadow-lg bg-[#FFEDF3] dark:bg-[#23272A] dark:text-[#ADEED9] transition-transform duration-300 hover:scale-105 hover:shadow-2xl dark:border dark:border-[#0ABAB5]">
                 <CardContent className="pt-6">
-                  <div className="rounded-full bg-[#ADEED9] p-3 w-12 h-12 flex items-center justify-center mb-4">
+                  <div className="rounded-full bg-[#ADEED9] p-3 w-12 h-12 flex items-center justify-center mb-4 dark:border dark:border-[#0ABAB5]">
                     <Brain className="h-6 w-6 text-[#0ABAB5]" />
                   </div>
                   <h3 className="text-xl font-bold mb-2 text-[#0A3A36] dark:text-[#ADEED9]">Customizable Personalities</h3>
@@ -95,9 +95,9 @@ export default function Home() {
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-lg bg-[#FFEDF3] dark:bg-[#23272A] dark:text-[#ADEED9] transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
+              <Card className="border-0 shadow-lg bg-[#FFEDF3] dark:bg-[#23272A] dark:text-[#ADEED9] transition-transform duration-300 hover:scale-105 hover:shadow-2xl dark:border dark:border-[#0ABAB5]">
                 <CardContent className="pt-6">
-                  <div className="rounded-full bg-[#ADEED9] p-3 w-12 h-12 flex items-center justify-center mb-4">
+                  <div className="rounded-full bg-[#ADEED9] p-3 w-12 h-12 flex items-center justify-center mb-4 dark:border dark:border-[#0ABAB5]">
                     <MessageSquare className="h-6 w-6 text-[#0ABAB5]" />
                   </div>
                   <h3 className="text-xl font-bold mb-2 text-[#0A3A36] dark:text-[#ADEED9]">Natural Conversations</h3>
@@ -107,9 +107,9 @@ export default function Home() {
                 </CardContent>
               </Card>
 
-              <Card className="border-0 shadow-lg bg-[#FFEDF3] dark:bg-[#23272A] dark:text-[#ADEED9] transition-transform duration-300 hover:scale-105 hover:shadow-2xl">
+              <Card className="border-0 shadow-lg bg-[#FFEDF3] dark:bg-[#23272A] dark:text-[#ADEED9] transition-transform duration-300 hover:scale-105 hover:shadow-2xl dark:border dark:border-[#0ABAB5]">
                 <CardContent className="pt-6">
-                  <div className="rounded-full bg-[#ADEED9] p-3 w-12 h-12 flex items-center justify-center mb-4">
+                  <div className="rounded-full bg-[#ADEED9] p-3 w-12 h-12 flex items-center justify-center mb-4 dark:border dark:border-[#0ABAB5]">
                     <Users className="h-6 w-6 text-[#0ABAB5]" />
                   </div>
                   <h3 className="text-xl font-bold mb-2 text-[#0A3A36] dark:text-[#ADEED9]">Community Sharing</h3>
@@ -134,7 +134,7 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="rounded-full bg-[#FFEDF3] dark:bg-[#23272A] p-6 w-24 h-24 flex items-center justify-center mx-auto mb-6">
+                <div className="rounded-full bg-[#FFEDF3] dark:bg-[#23272A] p-6 w-24 h-24 flex items-center justify-center mx-auto mb-6 dark:border-2 dark:border-[#0ABAB5]">
                   <span className="text-3xl font-bold text-[#0ABAB5]">1</span>
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-[#0ABAB5] dark:text-[#ADEED9]">Design Your AI</h3>
@@ -144,7 +144,7 @@ export default function Home() {
               </div>
 
               <div className="text-center">
-                <div className="rounded-full bg-[#FFEDF3] dark:bg-[#23272A] p-6 w-24 h-24 flex items-center justify-center mx-auto mb-6">
+                <div className="rounded-full bg-[#FFEDF3] dark:bg-[#23272A] p-6 w-24 h-24 flex items-center justify-center mx-auto mb-6 dark:border-2 dark:border-[#0ABAB5]">
                   <span className="text-3xl font-bold text-[#0ABAB5]">2</span>
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-[#0ABAB5] dark:text-[#ADEED9]">Train & Customize</h3>
@@ -152,7 +152,7 @@ export default function Home() {
               </div>
 
               <div className="text-center">
-                <div className="rounded-full bg-[#FFEDF3] dark:bg-[#23272A] p-6 w-24 h-24 flex items-center justify-center mx-auto mb-6">
+                <div className="rounded-full bg-[#FFEDF3] dark:bg-[#23272A] p-6 w-24 h-24 flex items-center justify-center mx-auto mb-6 dark:border-2 dark:border-[#0ABAB5]">
                   <span className="text-3xl font-bold text-[#0ABAB5]">3</span>
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-[#0ABAB5] dark:text-[#ADEED9]">Chat & Connect</h3>
@@ -206,10 +206,10 @@ export default function Home() {
               Join thousands of users who have already designed their perfect AI companions.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button size="lg" className="bg-white text-[#0ABAB5] hover:bg-[#EBFFD8] font-bold dark:bg-[#23272A] dark:text-[#ADEED9] dark:hover:bg-[#23272A]/80">
+              <Button size="lg" className="bg-white text-[#0ABAB5] hover:bg-[#EBFFD8] font-bold dark:bg-[#23272A] dark:text-[#ADEED9] dark:hover:bg-[#23272A]/80 dark:border dark:border-[#0ABAB5]">
                 Get Started for Free
               </Button>
-              <Button size="lg" className="bg-white text-[#0ABAB5] hover:bg-[#EBFFD8] font-bold dark:bg-[#23272A] dark:text-[#ADEED9] dark:hover:bg-[#23272A]/80">
+              <Button size="lg" className="bg-white text-[#0ABAB5] hover:bg-[#EBFFD8] font-bold dark:bg-[#23272A] dark:text-[#ADEED9] dark:hover:bg-[#23272A]/80 dark:border dark:border-[#0ABAB5]">
                 Learn More
               </Button>
             </div>
