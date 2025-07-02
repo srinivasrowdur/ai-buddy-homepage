@@ -123,7 +123,7 @@ export default function Home() {
         </section>
         {/* ...existing code... */}
         {/* How It Works & Testimonials (split backgrounds) */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-[#EBFFD8] dark:bg-[#181C1F]">
+        <section className="py-16 px-4 sm:px-6 lg:px-8 bg-[#b0eeda] dark:bg-[#181C1F]">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#0ABAB5] via-[#B23A48] to-[#0A3A36] animate-gradient mb-4">How It Works</h2>
@@ -199,17 +199,17 @@ export default function Home() {
         </section>
         {/* ...existing code... */}
         {/* Final CTA */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#0ABAB5] text-white dark:bg-[#181C1F] dark:text-[#ADEED9]">
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#08bab5] text-white dark:bg-[#181C1F] dark:text-[#ADEED9]">
           <div className="max-w-5xl mx-auto text-center">
             <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-[#0ABAB5] via-[#B23A48] to-[#0A3A36] animate-gradient">Ready to Create Your AI Buddy?</h2>
             <p className="text-xl mb-8 text-[#0ABAB5] dark:text-[#0ABAB5]">
               Join thousands of users who have already designed their perfect AI companions.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button size="lg" className="bg-white text-[#0ABAB5] hover:bg-[#EBFFD8] font-bold dark:bg-[#23272A] dark:text-[#ADEED9] dark:hover:bg-[#23272A]/80 dark:border dark:border-[#0ABAB5]">
+              <Button size="lg" variant="outline" className="border-[#0ABAB5] text-[#0ABAB5] font-bold hover:bg-[#ADEED9] transition-transform duration-300 hover:scale-105">
                 Get Started for Free
               </Button>
-              <Button size="lg" className="bg-white text-[#0ABAB5] hover:bg-[#EBFFD8] font-bold dark:bg-[#23272A] dark:text-[#ADEED9] dark:hover:bg-[#23272A]/80 dark:border dark:border-[#0ABAB5]">
+              <Button size="lg" variant="outline" className="border-[#0ABAB5] text-[#0ABAB5] font-bold hover:bg-[#ADEED9] transition-transform duration-300 hover:scale-105">
                 Learn More
               </Button>
             </div>
